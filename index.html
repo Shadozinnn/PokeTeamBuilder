@@ -558,7 +558,7 @@ Para cada Pokémon, forneça uma build competitiva completa. Responda APENAS em 
 Responda SOMENTE o JSON, sem texto adicional.`;
 
   try {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
+    const r = await fetch("/.netlify/functions/claude", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({
