@@ -1,0 +1,676 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #E3350D;
+    --dark-red: #9B2308;
+    --yellow: #FFCB05;
+    --dark-yellow: #B8860B;
+    --blue: #3B5CA8;
+    --light-blue: #6890F0;
+    --dark: #1a1a2e;
+    --darker: #0f0f1a;
+    --card-bg: rgba(255,255,255,0.05);
+    --card-border: rgba(255,255,255,0.1);
+    --text: #f0f0f0;
+    --muted: #aaa;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--darker);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--red) 0%, var(--dark-red) 50%, #1a1a2e 100%);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 3px solid var(--yellow);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+    border: 40px solid rgba(255,255,255,0.05);
+  }
+  .header-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: var(--yellow);
+    line-height: 1.8;
+    text-shadow: 2px 2px 0 var(--dark-red);
+  }
+  .header-title span { color: #fff; font-size: 10px; display: block; margin-top: 4px; }
+  .pokeball-icon { font-size: 40px; }
+
+  .main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+
+  .section-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--yellow);
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--yellow), transparent);
+  }
+
+  .search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .search-box input {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .search-box input:focus { border-color: var(--yellow); }
+  .search-box input::placeholder { color: var(--muted); }
+  .btn {
+    background: var(--red);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--dark-red); }
+  .btn:active { transform: scale(0.97); }
+  .btn-yellow { background: var(--yellow); color: var(--dark); }
+  .btn-yellow:hover { background: var(--dark-yellow); color: #fff; }
+  .btn-blue { background: var(--blue); }
+  .btn-blue:hover { background: #2a4180; }
+  .btn-sm { padding: 6px 10px; font-size: 11px; border-radius: 6px; }
+
+  .suggestions {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem;
+  }
+  .suggestion-chip {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+  .suggestion-chip:hover { border-color: var(--yellow); color: var(--yellow); }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .pokemon-slot {
+    background: var(--card-bg);
+    border: 1.5px dashed rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: pointer;
+    text-align: center;
+  }
+  .pokemon-slot.empty:hover {
+    border-color: rgba(255,203,5,0.4);
+    background: rgba(255,203,5,0.03);
+  }
+  .pokemon-slot.filled {
+    border-style: solid;
+    border-color: rgba(255,255,255,0.15);
+    justify-content: flex-start;
+  }
+  .slot-number {
+    position: absolute;
+    top: 8px; left: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: rgba(255,255,255,0.25);
+  }
+  .slot-empty-icon { font-size: 32px; opacity: 0.2; margin-bottom: 6px; }
+  .slot-empty-text { font-size: 11px; color: var(--muted); }
+
+  .pokemon-sprite {
+    width: 72px;
+    height: 72px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  }
+  .pokemon-name-display {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #fff;
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }
+  .type-badges { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+  .type-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .remove-btn {
+    position: absolute;
+    top: 6px; right: 6px;
+    background: rgba(200,50,50,0.5);
+    border: none;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    color: #fff;
+    font-size: 10px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .pokemon-slot.filled:hover .remove-btn { display: flex; }
+  .view-build-btn {
+    margin-top: 8px;
+    width: 100%;
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .generate-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .generate-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%);
+  }
+  .generate-btn.loading::before {
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { to { transform: translateX(100%); } }
+
+  .build-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .build-panel.visible { display: block; }
+  .build-panel-header {
+    background: rgba(255,255,255,0.05);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--card-border);
+  }
+  .build-sprite { width: 52px; height: 52px; image-rendering: pixelated; }
+  .build-panel-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #fff;
+  }
+  .build-panel-subtitle { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .build-content { padding: 1.25rem; }
+  .build-section { margin-bottom: 1.25rem; }
+  .build-section:last-child { margin-bottom: 0; }
+  .build-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+  }
+  .moves-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .move-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .move-type { font-size: 9px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+
+  .ev-bars { display: flex; flex-direction: column; gap: 6px; }
+  .ev-row { display: flex; align-items: center; gap: 8px; }
+  .ev-stat-name { font-size: 11px; color: var(--muted); min-width: 32px; }
+  .ev-bar-bg {
+    flex: 1; height: 6px; background: rgba(255,255,255,0.08);
+    border-radius: 3px; overflow: hidden;
+  }
+  .ev-bar-fill {
+    height: 100%; border-radius: 3px;
+    background: var(--yellow);
+    transition: width 0.5s;
+  }
+  .ev-value { font-size: 11px; font-weight: 700; min-width: 28px; text-align: right; }
+
+  .info-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .info-chip {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .info-chip span { color: var(--muted); font-size: 10px; display: block; }
+
+  .ai-analysis {
+    background: rgba(59, 92, 168, 0.12);
+    border: 1px solid rgba(59, 92, 168, 0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #ccd6f6;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .ai-analysis.visible { display: block; }
+  .ai-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--light-blue);
+    margin-bottom: 8px;
+  }
+
+  .loading-dots::after {
+    content: '...';
+    animation: dots 1.2s steps(4,end) infinite;
+  }
+  @keyframes dots {
+    0%,20%{content:''}30%,50%{content:'.'}60%,80%{content:'..'}90%,100%{content:'...'}
+  }
+
+  .type-colors {
+    normal:#A8A878;fire:#F08030;water:#6890F0;electric:#F8D030;grass:#78C850;
+    ice:#98D8D8;fighting:#C03028;poison:#A040A0;ground:#E0C068;flying:#A890F0;
+    psychic:#F85888;bug:#A8B820;rock:#B8A038;ghost:#705898;dragon:#7038F8;
+    dark:#705848;steel:#B8B8D0;fairy:#EE99AC;
+  }
+
+  .pokeball-anim {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .team-analysis {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .team-analysis.visible { display: block; }
+</style>
+
+<h2 class="sr-only">Construtor de Times Pokémon com Builds Automáticas por IA</h2>
+
+<div class="header">
+  <div class="pokeball-icon">⬤</div>
+  <div>
+    <div class="header-title">
+      POKÉMON TEAM BUILDER
+      <span>Builds automáticas com IA • Geração I ao IX</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="section-title">🔍 Adicionar Pokémon</div>
+  <div class="search-box">
+    <input type="text" id="pokemonInput" placeholder="Nome do Pokémon (ex: Garchomp, Blissey...)" autocomplete="off" />
+    <button class="btn" onclick="addPokemon()">+ Adicionar</button>
+  </div>
+
+  <div class="suggestions" id="suggestions">
+    <span style="font-size:11px;color:var(--muted);align-self:center;">Sugestões:</span>
+  </div>
+
+  <div class="section-title">👥 Seu Time</div>
+  <div class="team-grid" id="teamGrid"></div>
+
+  <button class="btn btn-yellow generate-btn" id="generateBtn" onclick="generateBuilds()" disabled>
+    <span id="generateBtnIcon">⚡</span>
+    <span id="generateBtnText">Gerar Builds com IA</span>
+  </button>
+
+  <div class="ai-analysis" id="teamAnalysis">
+    <div class="ai-label">🤖 Análise do Time</div>
+    <div id="teamAnalysisText"></div>
+  </div>
+
+  <div id="buildsContainer"></div>
+</div>
+
+<script>
+const SUGGESTED = ['Garchomp','Blissey','Rotom-Wash','Tyranitar','Ferrothorn','Clefable','Toxapex','Landorus','Scizor','Volcarona','Dragapult','Corviknight'];
+
+const TYPE_COLORS = {
+  normal:'#A8A878',fire:'#F08030',water:'#6890F0',electric:'#F8D030',grass:'#78C850',
+  ice:'#98D8D8',fighting:'#C03028',poison:'#A040A0',ground:'#E0C068',flying:'#A890F0',
+  psychic:'#F85888',bug:'#A8B820',rock:'#B8A038',ghost:'#705898',dragon:'#7038F8',
+  dark:'#705848',steel:'#B8B8D0',fairy:'#EE99AC'
+};
+
+let team = [];
+let pokemonCache = {};
+let builds = {};
+
+function initSuggestions() {
+  const s = document.getElementById('suggestions');
+  SUGGESTED.slice(0,8).forEach(p => {
+    const chip = document.createElement('div');
+    chip.className = 'suggestion-chip';
+    chip.textContent = p;
+    chip.onclick = () => { document.getElementById('pokemonInput').value = p; addPokemon(); };
+    s.appendChild(chip);
+  });
+}
+
+async function fetchPokemon(name) {
+  const key = name.toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if (pokemonCache[key]) return pokemonCache[key];
+  try {
+    const r = await fetch(`https://pokeapi.co/api/v2/pokemon/${key}`);
+    if (!r.ok) throw new Error('not found');
+    const d = await r.json();
+    pokemonCache[key] = d;
+    return d;
+  } catch { return null; }
+}
+
+async function addPokemon() {
+  const input = document.getElementById('pokemonInput');
+  const name = input.value.trim();
+  if (!name || team.length >= 6) return;
+  if (team.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+    showToast('Pokémon já está no time!'); return;
+  }
+  input.value = '';
+  const data = await fetchPokemon(name);
+  if (!data) { showToast('Pokémon não encontrado!'); return; }
+  team.push(data);
+  renderTeam();
+  updateGenBtn();
+}
+
+function removePokemon(i) {
+  team.splice(i, 1);
+  delete builds[i];
+  renderTeam();
+  updateGenBtn();
+  document.getElementById('buildsContainer').innerHTML = '';
+  document.getElementById('teamAnalysis').classList.remove('visible');
+}
+
+function renderTeam() {
+  const grid = document.getElementById('teamGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement('div');
+    if (i < team.length) {
+      const p = team[i];
+      const types = p.types.map(t => t.type.name);
+      const sprite = p.sprites.front_default || p.sprites.other?.['official-artwork']?.front_default;
+      slot.className = 'pokemon-slot filled';
+      slot.innerHTML = `
+        <span class="slot-number">#${String(i+1).padStart(2,'0')}</span>
+        <button class="remove-btn" onclick="removePokemon(${i})">✕</button>
+        ${sprite ? `<img class="pokemon-sprite" src="${sprite}" alt="${p.name}">` : '<div style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;font-size:28px">⬤</div>'}
+        <div class="pokemon-name-display">${p.name.toUpperCase()}</div>
+        <div class="type-badges">
+          ${types.map(t => `<span class="type-badge" style="background:${TYPE_COLORS[t]||'#888'};color:#fff">${t}</span>`).join('')}
+        </div>
+        ${builds[i] ? `<button class="btn btn-blue btn-sm view-build-btn" onclick="scrollToBuild(${i})">Ver Build ↓</button>` : ''}
+      `;
+    } else {
+      slot.className = 'pokemon-slot empty';
+      slot.innerHTML = `
+        <span class="slot-number">#${String(i+1).padStart(2,'0')}</span>
+        <div class="slot-empty-icon">◯</div>
+        <div class="slot-empty-text">Vazio</div>
+      `;
+    }
+    grid.appendChild(slot);
+  }
+}
+
+function updateGenBtn() {
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = team.length === 0;
+}
+
+async function generateBuilds() {
+  if (team.length === 0) return;
+  const btn = document.getElementById('generateBtn');
+  const icon = document.getElementById('generateBtnIcon');
+  const txt = document.getElementById('generateBtnText');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  icon.innerHTML = '<span class="pokeball-anim">⬤</span>';
+  txt.textContent = 'IA gerando builds';
+  txt.className = 'loading-dots';
+
+  const container = document.getElementById('buildsContainer');
+  container.innerHTML = '';
+  builds = {};
+
+  const teamList = team.map((p,i) => {
+    const types = p.types.map(t=>t.type.name).join('/');
+    const stats = {};
+    p.stats.forEach(s => stats[s.stat.name] = s.base_stat);
+    return `${i+1}. ${p.name} (tipo: ${types}, HP:${stats.hp}, Atk:${stats.attack}, Def:${stats.defense}, SpAtk:${stats['special-attack']}, SpDef:${stats['special-defense']}, Spd:${stats.speed})`;
+  }).join('\n');
+
+  const prompt = `Você é um especialista em Pokémon competitivo (VGC/Smogon). Analise este time e gere builds otimizadas para cada Pokémon:
+
+TIME:
+${teamList}
+
+Para cada Pokémon, forneça uma build competitiva completa. Responda APENAS em JSON válido com esta estrutura exata:
+{
+  "team_analysis": "Análise em 2-3 frases sobre sinergia do time, cobertura de tipos e estratégia geral",
+  "builds": [
+    {
+      "pokemon": "nome",
+      "role": "Papel no time (ex: Sweeper, Tank, Suporte)",
+      "item": "Item recomendado",
+      "ability": "Habilidade",
+      "nature": "Natureza",
+      "evs": {"hp":0,"attack":0,"defense":0,"special-attack":0,"special-defense":0,"speed":0},
+      "moves": [
+        {"name":"Nome do Golpe","type":"tipo","desc":"Por quê usar"},
+        {"name":"Nome do Golpe","type":"tipo","desc":"Por quê usar"},
+        {"name":"Nome do Golpe","type":"tipo","desc":"Por quê usar"},
+        {"name":"Nome do Golpe","type":"tipo","desc":"Por quê usar"}
+      ],
+      "tera_type": "Tipo Tera (geração 9) ou N/A",
+      "strategy": "Estratégia de uso em 1-2 frases"
+    }
+  ]
+}
+Responda SOMENTE o JSON, sem texto adicional.`;
+
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const d = await r.json();
+    const text = d.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(text);
+
+    document.getElementById('teamAnalysisText').textContent = parsed.team_analysis;
+    document.getElementById('teamAnalysis').classList.add('visible');
+
+    parsed.builds.forEach((build, i) => {
+      builds[i] = build;
+      renderBuild(build, i, container);
+    });
+    renderTeam();
+
+  } catch(e) {
+    container.innerHTML = `<div style="color:#f08030;font-size:13px;padding:1rem;background:rgba(240,128,48,0.1);border-radius:8px;border:1px solid rgba(240,128,48,0.3)">Erro ao gerar builds. Tente novamente.</div>`;
+  }
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  icon.textContent = '⚡';
+  txt.className = '';
+  txt.textContent = 'Gerar Builds com IA';
+}
+
+function renderBuild(build, idx, container) {
+  const p = team[idx];
+  const sprite = p?.sprites?.front_default;
+  const evTotal = Object.values(build.evs).reduce((a,b)=>a+b,0);
+
+  const panel = document.createElement('div');
+  panel.className = 'build-panel visible';
+  panel.id = `build-${idx}`;
+
+  const evBars = ['hp','attack','defense','special-attack','special-defense','speed'].map(stat => {
+    const val = build.evs[stat] || 0;
+    const pct = Math.min(100, (val/252)*100);
+    const label = {hp:'HP',attack:'Atk',defense:'Def','special-attack':'SpA','special-defense':'SpD',speed:'Spe'}[stat];
+    return `<div class="ev-row">
+      <span class="ev-stat-name">${label}</span>
+      <div class="ev-bar-bg"><div class="ev-bar-fill" style="width:${pct}%"></div></div>
+      <span class="ev-value">${val}</span>
+    </div>`;
+  }).join('');
+
+  const movesHTML = build.moves.map(m => `
+    <div class="move-card">
+      <div>${m.name}</div>
+      <div class="move-type" style="color:${TYPE_COLORS[m.type?.toLowerCase()]||'var(--muted)'}">▸ ${m.type || ''}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:400">${m.desc}</div>
+    </div>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="build-panel-header">
+      ${sprite ? `<img class="build-sprite" src="${sprite}" alt="${build.pokemon}">` : '<span style="font-size:40px">⬤</span>'}
+      <div>
+        <div class="build-panel-name">${build.pokemon.toUpperCase()}</div>
+        <div class="build-panel-subtitle">${build.role}</div>
+      </div>
+    </div>
+    <div class="build-content">
+      <div class="build-section">
+        <div class="build-label">Informações</div>
+        <div class="info-row">
+          <div class="info-chip"><span>Item</span>${build.item}</div>
+          <div class="info-chip"><span>Habilidade</span>${build.ability}</div>
+          <div class="info-chip"><span>Natureza</span>${build.nature}</div>
+          ${build.tera_type && build.tera_type !== 'N/A' ? `<div class="info-chip"><span>Tera Tipo</span>${build.tera_type}</div>` : ''}
+        </div>
+      </div>
+      <div class="build-section">
+        <div class="build-label">Golpes</div>
+        <div class="moves-grid">${movesHTML}</div>
+      </div>
+      <div class="build-section">
+        <div class="build-label">EVs (${evTotal}/510)</div>
+        <div class="ev-bars">${evBars}</div>
+      </div>
+      <div class="build-section">
+        <div class="build-label">Estratégia</div>
+        <div style="font-size:13px;line-height:1.6;color:#ccd6f6;background:rgba(255,255,255,0.04);padding:10px 12px;border-radius:8px;border-left:3px solid var(--yellow)">${build.strategy}</div>
+      </div>
+    </div>
+  `;
+  container.appendChild(panel);
+}
+
+function scrollToBuild(i) {
+  const el = document.getElementById(`build-${i}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 18px;border-radius:8px;font-size:13px;z-index:999;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+document.getElementById('pokemonInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addPokemon();
+});
+
+initSuggestions();
+renderTeam();
+</script>
